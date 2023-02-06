@@ -8,7 +8,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.use(express.static(__dirname));
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}))
 
 var dbUrl = 'mongodb+srv://temp:9GW3DWTtGAn.D9@cluster0.qibcjdv.mongodb.net/fs2?retryWrites=true&w=majority'
