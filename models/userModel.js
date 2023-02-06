@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     trim: true
   },
   password: {
-    type: password,
+    type: String,
     required: true,
     trim:true
   },
@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 // Pre-save chain
-MessageSchema.pre('save', (next) => {
+UserSchema.pre('save', (next) => {
     let now = Date.now()
 
     // set updatedat value after save
@@ -45,7 +45,7 @@ MessageSchema.pre('save', (next) => {
     next()
 });
 
-MessageSchema.pre('findOneAndUpdate', (next) => {
+UserSchema.pre('findOneAndUpdate', (next) => {
     // set updateat after updating
     this.updatedat = now
     next()
