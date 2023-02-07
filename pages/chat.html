@@ -21,19 +21,23 @@
                 <div id="plist" class="people-list">
                     <ul class="list-unstyled chat-list mt-2 mb-0" style="background-color: #1d8ecd;">
                         <li id="happyRoom" class="clearfix">
+                            
                             <div class="about">
                                 <div class="name">Happy</div>                                           
                             </div>
+                            <span id="leaveHappy" class="out">X</span>
                         </li>
                         <li id="sadRoom" class="clearfix">
                             <div  class="about">
                                 <div class="name">Sad</div>                                           
                             </div>
+                            <span id="leaveSad" class="out">X</span>
                         </li>
                         <li id="madRoom" class="clearfix">
                             <div  class="about">
                                 <div class="name">Mad</div>                                           
                             </div>
+                            <span id="leaveMad" class="out">X</span>
                         </li>
                     </ul>
                 </div>
@@ -46,7 +50,7 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="chat-about">
-                                    <h6 id="welcome" class="m-b-0" style="font-size: 24px;">Welcome to Emesen Chat!</h6>
+                                    <h6 id="welcome" class="m-b-0" style="font-size: 18px;">Welcome to Emesen Chat!</h6>
                                 </div>
                             </div>
                         </div>
@@ -73,7 +77,12 @@
     </div>
     </div>
     <script>
-        let room = 'happy'
+        var socket = io()        
+        var room = 'happy'
+        var allRooms = ""
+
+
+        // Functions
         $(function () {
             $("#happyRoom").click(()=>{
                 $("#messages").empty()
@@ -82,10 +91,22 @@
             })
         })
         $(function () {
+            $("#leaveHappy").click(()=>{
+                socket.emit('leave', "happy")
+                $("#happyRoom").empty()
+            })
+        })
+        $(function () {
             $("#madRoom").click(()=>{
                 $("#messages").empty()
                 room = "mad"
                 getMessagesByRoom("mad")
+            })
+        })
+        $(function () {
+            $("#leaveMad").click(()=>{
+                socket.emit('leave', "happy")
+                $("#madRoom").empty()
             })
         })
         $(function () {           
@@ -96,6 +117,12 @@
             })
         })
         $(function () {
+            $("#leaveSad").click(()=>{
+                socket.emit('leave', "sad")
+                $("#sadRoom").empty()
+            })
+        })
+        $(function () {
             $("#send").click(()=>{
                 sendMessage({sender: getName(), message: $("#message").val(), room: room});
             })
@@ -103,7 +130,7 @@
 
         function sendMessage(message){
             $.post('http://localhost:3000/messages', message)
-            getLatest(room)
+            // getLatest(room)
             $("#message").val("")
         }
 
@@ -118,12 +145,6 @@
             })
         }
 
-        function getLatest(room) {
-            $.get('http://localhost:3000/messages/latest/' + room, (data) => {
-                setTimeout(addMessage(data), 800)
-            })
-        }
-
         function addMessage(message){
             $("#messages").append(`<li class="clearfix">
                                     <div class="name">${message.sender}</div>
@@ -133,6 +154,23 @@
                                     <div class="message my-message">${message.message}</div>                                    
                                 </li>`)
         }
-    </script>
+
+
+        // IO Listeners
+        socket.on('message', addMessage)
+
+        socket.on('gone', (rooms) => {
+            console.log("got gone")
+            Object.values(rooms).forEach((room)=> {
+                console.log(room)
+            })
+        })
+
+        socket.on('rooms', (rooms) => {
+            allRooms = rooms
+        })
+
+        
+    </script> 
 </body>
 </html>
