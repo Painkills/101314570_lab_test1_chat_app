@@ -31,6 +31,14 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+UserSchema.methods.validatePassword = function(pwd) {
+  return (pwd === this.password)? true : false;
+}
+
+UserSchema.methods.getFullName = function () {
+  return `${this.firstName} ${this.lastName}`
+}
+
 // Pre-save chain
 UserSchema.pre('save', (next) => {
     let now = Date.now()

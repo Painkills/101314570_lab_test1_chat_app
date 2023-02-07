@@ -1,12 +1,10 @@
 const express = require('express');
+const app = express();
 const dm = require('../models/directMessageModel');
 const pm = require('../models/messageModel');
 const user = require('../models/userModel');
-const app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 
-
+// Get all messages (JUST FOR TESTING)
 app.get('/messages', async (req, res) => {
     const messages = await pm.find({})
     try {
@@ -15,6 +13,41 @@ app.get('/messages', async (req, res) => {
         res.status(500).send(err);
     }
 })
+
+// Get Messages by Room
+app.get('/messages/:room', async (req, res) => {
+    
+    const room = req.params.room
+    const messages = await pm.find({room : room});
+    
+    try {
+      if(messages.length != 0){
+        res.send(messages);
+      }else{
+        res.send(JSON.stringify({status:false, message: "No data found"}))
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+});
+
+// Get latest message by Room
+app.get('/messages/latest/:room', async (req, res) => {
+    
+    const room = req.params.room
+    const messages = await pm.find({room : room}).sort({'created': -1});
+    console.log(messages[0])
+
+    try {
+      if(messages.length != 0){
+        res.send(messages[0]);
+      }else{
+        res.send(JSON.stringify({status:false, message: "No data found"}))
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+});
   
 app.post('/messages', async (req, res) => {
     var message = new pm(req.body);
@@ -23,7 +56,6 @@ app.post('/messages', async (req, res) => {
           if(err){
                 res.send(err)
             }else{
-                io.emit('message', req.body)
                 res.send(message);
             }
         });
